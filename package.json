@@ -1,0 +1,50 @@
+{
+  "name": "sync-shortcuts-mac",
+  "version": "0.0.0",
+  "description": "Import and export custom keyboard shortcuts on macs.",
+  "main": "bin/index.js",
+  "bin": {
+    "sync-shortcuts-mac": "./bin/index.js",
+    "ssm": "./bin/index.js"
+  },
+  "type": "module",
+  "scripts": {
+    "lint": "eslint",
+    "build": "vite build",
+    "dev": "tsx src/index.ts --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/davidenke/sync-shortcuts-mac.git"
+  },
+  "keywords": [
+    "mac",
+    "keyboard",
+    "shortcuts",
+    "sync",
+    "import",
+    "export"
+  ],
+  "author": {
+    "email": "david@enke.dev",
+    "name": "David Enke"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/davidenke/sync-shortcuts-mac/issues"
+  },
+  "homepage": "https://github.com/davidenke/sync-shortcuts-mac#readme",
+  "devDependencies": {
+    "@enke.dev/lint": "0.3.0",
+    "@tsconfig/node22": "22.0.0",
+    "@tsconfig/strictest": "2.0.5",
+    "@types/node": "22.10.5",
+    "eslint": "9.18.0",
+    "jiti": "2.4.2",
+    "prettier": "3.4.2",
+    "tsx": "4.19.2",
+    "typescript": "5.7.3",
+    "vite": "6.0.7",
+    "vite-plugin-target": "0.1.1"
+  }
+}
