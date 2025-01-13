@@ -2,8 +2,6 @@
 
 Import and export custom keyboard shortcuts on macs.
 
-> Right now this is no real sync, as existing shortcuts are overwritten.
-
 ## Usage
 
 ```bash
@@ -15,3 +13,6 @@ npx -y -p sync-shortcuts-mac@latest ssm
 # override existing shortcuts on import
 npx -y -p sync-shortcuts-mac@latest ssm --overwrite
 ```
+
+> Changes take effect on the next login.
+> To see the changes in the system settings, you might want to reboot.
