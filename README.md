@@ -7,5 +7,11 @@ Import and export custom keyboard shortcuts on macs.
 ## Usage
 
 ```bash
-npx -y sync-shortcuts-mac
+npx sync-shortcuts-mac
+
+# force latest version and skip asking
+npx -y sync-shortcuts-mac@latest ssm
+
+# override existing shortcuts on import
+npx -y sync-shortcuts-mac@latest ssm --overwrite
 ```
