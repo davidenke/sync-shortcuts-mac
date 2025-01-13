@@ -1,3 +1,5 @@
+![NPM Version](https://img.shields.io/npm/v/sync-shortcuts-mac)
+
 # Sync shortcuts (mac)
 
 Import and export custom keyboard shortcuts on macs.
