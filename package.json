@@ -1,6 +1,6 @@
 {
   "name": "sync-shortcuts-mac",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "Import and export custom keyboard shortcuts on macs.",
   "main": "bin/index.js",
   "bin": {

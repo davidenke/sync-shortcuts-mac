@@ -1,5 +1,12 @@
 # Sync shortcuts (mac)
 
+## [0.2.4](https://github.com/davidenke/sync-shortcuts-mac/compare/0.2.3...0.2.4) (2025-01-13)
+
+
+### Bug Fixes
+
+* handle invalid paths ([f811a99](https://github.com/davidenke/sync-shortcuts-mac/commit/f811a9911f5f8739262677917f9306d8a231bf4a))
+
 ## [0.2.3](https://github.com/davidenke/sync-shortcuts-mac/compare/0.2.2...0.2.3) (2025-01-13)
 
 ## [0.2.2](https://github.com/davidenke/sync-shortcuts-mac/compare/0.2.1...0.2.2) (2025-01-13)
