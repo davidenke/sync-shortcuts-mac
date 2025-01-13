@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { existsSync } from 'node:fs';
+import { existsSync, lstatSync } from 'node:fs';
 import { readdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { resolve } from 'node:path';
@@ -59,31 +59,37 @@ if (chosen === 'export') {
   const to = resolve(path.replace('~', homedir()));
   if (existsSync(to)) await unlink(to);
   await writeFile(to, JSON.stringify(shortcuts, null, 2));
-  console.log(`${green('✓')} Exported shortcuts to ${cyan(path)}`);
+  console.info(`${green('✓')} Exported shortcuts to ${cyan(path)}`);
 }
 
 // import shortcuts
 if (chosen === 'import') {
   const path = await askPath('Enter the path to the shortcuts file');
-  if (!path || !existsSync(path)) {
-    console.log(red('✗'), 'Invalid path');
+  if (!path || !existsSync(path) || !lstatSync(path).isFile()) {
+    console.error(`${red('✗')} Invalid path`);
     process.exit(1);
   }
 
   // merge the shortcuts into the existing settings, if found
-  const shortcuts = JSON.parse(await readFile(path, { encoding: 'utf-8' })) as Shortcuts;
-  Object.entries(shortcuts).map(([name, importedBindings]) => {
-    const to = resolve(PATH.replace('~', homedir()), name);
-    try {
-      const content = plist.readFileSync<WithShortcuts>(to);
-      const NSUserKeyEquivalents = !overwriteExistingBindings
-        ? { ...content.NSUserKeyEquivalents, ...importedBindings }
-        : importedBindings;
-      plist.writeFileSync(to, { ...content, NSUserKeyEquivalents });
-      const method = overwriteExistingBindings ? 'Overwritten' : 'Imported';
-      console.log(`${green('✓')} ${method} ${cyan(name)}`);
-    } catch (_) {
-      console.warn(`${yellow('⚠')} No settings file found for ${cyan(to)}`);
-    }
-  });
+  try {
+    const contents = await readFile(path, { encoding: 'utf-8' });
+    const shortcuts = JSON.parse(contents) as Shortcuts;
+    Object.entries(shortcuts).map(([name, importedBindings]) => {
+      const to = resolve(PATH.replace('~', homedir()), name);
+      try {
+        const content = plist.readFileSync<WithShortcuts>(to);
+        const NSUserKeyEquivalents = !overwriteExistingBindings
+          ? { ...content.NSUserKeyEquivalents, ...importedBindings }
+          : importedBindings;
+        plist.writeFileSync(to, { ...content, NSUserKeyEquivalents });
+        const method = overwriteExistingBindings ? 'Overwritten' : 'Imported';
+        console.info(`${green('✓')} ${method} ${cyan(name)}`);
+      } catch (_) {
+        console.warn(`${yellow('⚠')} No settings file found for ${cyan(to)}`);
+      }
+    });
+  } catch (_) {
+    console.error(`${red('✗')} Invalid JSON file`);
+    process.exit(1);
+  }
 }
