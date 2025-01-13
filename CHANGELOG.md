@@ -1,5 +1,7 @@
 # Sync shortcuts (mac)
 
+## [0.2.3](https://github.com/davidenke/sync-shortcuts-mac/compare/0.2.2...0.2.3) (2025-01-13)
+
 ## [0.2.2](https://github.com/davidenke/sync-shortcuts-mac/compare/0.2.1...0.2.2) (2025-01-13)
 
 
