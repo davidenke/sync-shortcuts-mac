@@ -1,42 +1,28 @@
 #!/usr/bin/env node
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
-import { unlink, writeFile } from 'node:fs/promises';
+import { existsSync } from 'node:fs';
+import { readdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { resolve } from 'node:path';
 import { stdout } from 'node:process';
+
+import plist from 'simple-plist';
 
 import { askChoices } from './utils/ask-choices.js';
 import { askPath } from './utils/ask-path.js';
 import { cyan, eraseLines, green, red, yellow } from './utils/tty.js';
 
-// out custom interchange format for all files as base64
-type Shortcuts = {
-  globals: string;
-  apps: string;
-  services: string;
-};
+// our simple interchangeable shortcuts format
+type PlistName = string;
+type MenuName = string;
+type Keys = string;
+type Shortcuts = Record<PlistName, Record<MenuName, Keys>>;
 
-// some constants
-const PATHS = {
-  globals: {
-    path: '~/Library/Preferences/com.apple.symbolichotkeys.plist',
-    name: 'global hot keys',
-  },
-  apps: {
-    path: '~/Library/Preferences/.GlobalPreferences.plist',
-    name: 'app shortcuts',
-  },
-  services: {
-    path: '~/Library/Preferences/pbs.plist',
-    name: 'service shortcuts',
-  },
-} satisfies {
-  [kry in keyof Shortcuts]: {
-    path: string;
-    name: string;
-  };
-};
+// signature to check in apples settings files
+type WithShortcuts = { NSUserKeyEquivalents: Record<MenuName, Keys> };
+
+// where to find and store the shortcuts
+const PATH = '~/Library/Preferences';
 
 // determine action
 const choices = { import: 'import shortcuts', export: 'export shortcuts' };
@@ -46,25 +32,20 @@ const chosen = Object.keys(choices)[choice] as keyof typeof choices;
 // clear the question and answer
 stdout.write(eraseLines(3));
 
-// export shortcuts
+// find custom application shortcuts in related plist files in
+// ~/Library/Preferences/*.plist by checking the existence of
+// the key `NSUserKeyEquivalents`...
 if (chosen === 'export') {
-  // prepare object to store all shortcuts
-  const shortcuts: Partial<Shortcuts> = {};
-
   // handle all configured paths
-  Object.entries(PATHS).map(([key, { path, name }]) => {
-    // start logging and prepare path within home directory
-    stdout.write(`${cyan('>')} Exporting ${name} `);
-    const from = resolve(path.replace('~', homedir()));
-
-    // check if file exists and read it
-    if (existsSync(from)) {
-      shortcuts[key as keyof Shortcuts] = readFileSync(from, { encoding: 'base64' });
-      stdout.write(`${green('✓')}\n`);
-    } else {
-      stdout.write(`${red('✗')}\n`);
-    }
-  });
+  const preferences = await readdir(resolve(PATH.replace('~', homedir())), { withFileTypes: true });
+  const plists = preferences.filter(file => file.isFile() && file.name.endsWith('.plist'));
+  const shortcuts = plists.reduce((shorts, file) => {
+    const path = resolve(file.parentPath, file.name);
+    const { NSUserKeyEquivalents } = plist.readFileSync<WithShortcuts>(path);
+    if (!NSUserKeyEquivalents) return shorts;
+    console.info(`${green('✓')} Exported ${cyan(file.name)}`);
+    return { ...shorts, [file.name]: NSUserKeyEquivalents };
+  }, {} as Shortcuts);
 
   // store the result in user home
   const path = '~/shortcuts.json';
@@ -82,20 +63,17 @@ if (chosen === 'import') {
     process.exit(1);
   }
 
-  const shortcuts = JSON.parse(readFileSync(path, { encoding: 'utf-8' })) as Shortcuts;
-
   // TODO: make it a real sync using the plist module and by checking if shortcuts
   //       are already present in the target file to not override everything
-  Object.entries(shortcuts).map(([key, value]) => {
-    if (!(key in PATHS)) {
-      console.warn(yellow('⚠'), `Unknown key ${key}`);
-      return;
+  const shortcuts = JSON.parse(await readFile(path, { encoding: 'utf-8' })) as Shortcuts;
+  Object.entries(shortcuts).map(([name, NSUserKeyEquivalents]) => {
+    const to = resolve(PATH.replace('~', homedir()), name);
+    try {
+      const content = plist.readFileSync<WithShortcuts>(to);
+      plist.writeFileSync(to, { ...content, NSUserKeyEquivalents });
+      console.log(`${green('✓')} Imported ${cyan(name)}`);
+    } catch (_) {
+      console.warn(`${yellow('⚠')} No settings file found for ${cyan(to)}`);
     }
-
-    const { path, name } = PATHS[key as keyof Shortcuts];
-    const to = resolve(path.replace('~', homedir()));
-    stdout.write(`${cyan('>')} Importing ${name} `);
-    writeFileSync(to, Buffer.from(value, 'base64'));
-    stdout.write(`${green('✓')}\n`);
   });
 }
