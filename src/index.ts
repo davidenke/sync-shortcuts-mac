@@ -29,7 +29,10 @@ const { values } = parseArgs({ options: { overwrite: { type: 'boolean' } } });
 const overwriteExistingBindings = values.overwrite ?? false;
 
 // determine action
-const choices = { import: 'import shortcuts', export: 'export shortcuts' };
+const choices = {
+  import: overwriteExistingBindings ? 'overwrite shortcuts' : 'import shortcuts',
+  export: 'export shortcuts',
+};
 const choice = await askChoices('What do you want to do?', Object.values(choices));
 const chosen = Object.keys(choices)[choice] as keyof typeof choices;
 
