@@ -2,8 +2,6 @@
 
 import { existsSync, lstatSync } from 'node:fs';
 import { readdir, readFile, unlink, writeFile } from 'node:fs/promises';
-import { homedir } from 'node:os';
-import { resolve } from 'node:path';
 import { stdout } from 'node:process';
 import { parseArgs } from 'node:util';
 
@@ -11,6 +9,7 @@ import plist from 'simple-plist';
 
 import { askChoices } from './utils/ask-choices.js';
 import { askPath } from './utils/ask-path.js';
+import { resolve } from './utils/paths.js';
 import { cyan, eraseLines, green, red, yellow } from './utils/tty.js';
 
 // our simple interchangeable shortcuts format
@@ -44,7 +43,7 @@ stdout.write(eraseLines(3));
 // the key `NSUserKeyEquivalents`...
 if (chosen === 'export') {
   // handle all configured paths
-  const preferences = await readdir(resolve(PATH.replace('~', homedir())), { withFileTypes: true });
+  const preferences = await readdir(resolve(PATH), { withFileTypes: true });
   const plists = preferences.filter(file => file.isFile() && file.name.endsWith('.plist'));
   const shortcuts = plists.reduce((shorts, file) => {
     const path = resolve(file.parentPath, file.name);
@@ -56,7 +55,7 @@ if (chosen === 'export') {
 
   // store the result in user home
   const path = '~/shortcuts.json';
-  const to = resolve(path.replace('~', homedir()));
+  const to = resolve(path);
   if (existsSync(to)) await unlink(to);
   await writeFile(to, JSON.stringify(shortcuts, null, 2));
   console.info(`${green('✓')} Exported shortcuts to ${cyan(path)}`);
@@ -75,7 +74,7 @@ if (chosen === 'import') {
     const contents = await readFile(path, { encoding: 'utf-8' });
     const shortcuts = JSON.parse(contents) as Shortcuts;
     Object.entries(shortcuts).map(([name, importedBindings]) => {
-      const to = resolve(PATH.replace('~', homedir()), name);
+      const to = resolve(PATH, name);
       try {
         const content = plist.readFileSync<WithShortcuts>(to);
         const NSUserKeyEquivalents = !overwriteExistingBindings
