@@ -1,5 +1,12 @@
 # Sync shortcuts (mac)
 
+## [0.2.1](https://github.com/davidenke/sync-shortcuts-mac/compare/0.2.0...0.2.1) (2025-01-13)
+
+
+### Bug Fixes
+
+* build bundleless ([af83eb7](https://github.com/davidenke/sync-shortcuts-mac/commit/af83eb7341155aaff33c1e3b50d2f7d0e10cd6d3))
+
 # 0.2.0 (2025-01-13)
 
 
