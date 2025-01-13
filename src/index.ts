@@ -5,6 +5,7 @@ import { readdir, readFile, unlink, writeFile } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { resolve } from 'node:path';
 import { stdout } from 'node:process';
+import { parseArgs } from 'node:util';
 
 import plist from 'simple-plist';
 
@@ -23,6 +24,9 @@ type WithShortcuts = { NSUserKeyEquivalents: Record<MenuName, Keys> };
 
 // where to find and store the shortcuts
 const PATH = '~/Library/Preferences';
+
+const { values } = parseArgs({ options: { overwrite: { type: 'boolean' } } });
+const overwriteExistingBindings = values.overwrite ?? false;
 
 // determine action
 const choices = { import: 'import shortcuts', export: 'export shortcuts' };
@@ -65,15 +69,16 @@ if (chosen === 'import') {
 
   // merge the shortcuts into the existing settings, if found
   const shortcuts = JSON.parse(await readFile(path, { encoding: 'utf-8' })) as Shortcuts;
-  Object.entries(shortcuts).map(([name, NSUserKeyEquivalents]) => {
+  Object.entries(shortcuts).map(([name, importedBindings]) => {
     const to = resolve(PATH.replace('~', homedir()), name);
     try {
       const content = plist.readFileSync<WithShortcuts>(to);
-      plist.writeFileSync(to, {
-        ...content,
-        NSUserKeyEquivalents: { ...content.NSUserKeyEquivalents, ...NSUserKeyEquivalents },
-      });
-      console.log(`${green('✓')} Imported ${cyan(name)}`);
+      const NSUserKeyEquivalents = !overwriteExistingBindings
+        ? { ...content.NSUserKeyEquivalents, ...importedBindings }
+        : importedBindings;
+      plist.writeFileSync(to, { ...content, NSUserKeyEquivalents });
+      const method = overwriteExistingBindings ? 'Overwritten' : 'Imported';
+      console.log(`${green('✓')} ${method} ${cyan(name)}`);
     } catch (_) {
       console.warn(`${yellow('⚠')} No settings file found for ${cyan(to)}`);
     }
