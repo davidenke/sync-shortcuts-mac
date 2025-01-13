@@ -1,4 +1,5 @@
-![NPM Version](https://img.shields.io/npm/v/sync-shortcuts-mac)
+[![NPM Version](https://img.shields.io/npm/v/sync-shortcuts-mac?logo=npm&labelColor=%2324292e)](https://www.npmjs.com/package/sync-shortcuts-mac)
+[![Build](https://github.com/davidenke/sync-shortcuts-mac/actions/workflows/release.yml/badge.svg)](https://github.com/davidenke/sync-shortcuts-mac/actions/workflows/release.yml)
 
 # Sync shortcuts (mac)
 
@@ -16,5 +17,5 @@ npx -y -p sync-shortcuts-mac@latest ssm
 npx -y -p sync-shortcuts-mac@latest ssm --overwrite
 ```
 
-> Changes take effect on the next login.
+> Changes take effect on the next login.\
 > To see the changes in the system settings, you might want to reboot.
