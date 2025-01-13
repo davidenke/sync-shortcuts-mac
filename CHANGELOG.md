@@ -1,5 +1,12 @@
 # Sync shortcuts (mac)
 
+## [0.2.2](https://github.com/davidenke/sync-shortcuts-mac/compare/0.2.1...0.2.2) (2025-01-13)
+
+
+### Bug Fixes
+
+* reflect overwrite mode ([e5a4ab7](https://github.com/davidenke/sync-shortcuts-mac/commit/e5a4ab79de87f6fc10fbb0bea16ecf59d5fc2c29))
+
 ## [0.2.1](https://github.com/davidenke/sync-shortcuts-mac/compare/0.2.0...0.2.1) (2025-01-13)
 
 
