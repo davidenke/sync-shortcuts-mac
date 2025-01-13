@@ -63,14 +63,16 @@ if (chosen === 'import') {
     process.exit(1);
   }
 
-  // TODO: make it a real sync using the plist module and by checking if shortcuts
-  //       are already present in the target file to not override everything
+  // merge the shortcuts into the existing settings, if found
   const shortcuts = JSON.parse(await readFile(path, { encoding: 'utf-8' })) as Shortcuts;
   Object.entries(shortcuts).map(([name, NSUserKeyEquivalents]) => {
     const to = resolve(PATH.replace('~', homedir()), name);
     try {
       const content = plist.readFileSync<WithShortcuts>(to);
-      plist.writeFileSync(to, { ...content, NSUserKeyEquivalents });
+      plist.writeFileSync(to, {
+        ...content,
+        NSUserKeyEquivalents: { ...content.NSUserKeyEquivalents, ...NSUserKeyEquivalents },
+      });
       console.log(`${green('✓')} Imported ${cyan(name)}`);
     } catch (_) {
       console.warn(`${yellow('⚠')} No settings file found for ${cyan(to)}`);
